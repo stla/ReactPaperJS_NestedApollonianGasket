@@ -5,6 +5,7 @@ import { complex } from 'mathjs';
 import CustomizedSlider from './slider.js';
 import { PaperContainer, Circle } from '@psychobolt/react-paperjs';
 import Grid from '@material-ui/core/Grid';
+import Checkbox from '@material-ui/core/Checkbox';
 import cividis from './cividisHex.js';
 import viridis from './viridisHex.js';
 import g from './geometry.js';
@@ -32,18 +33,24 @@ function fillColor(zcircle, color) {
 }
 
 /* jshint ignore:start */
-function makeCircle(zcircle, color) {
+function makeCircle(zcircle, color, fill) {
   var cx = zcircle.center.re, cy = zcircle.center.im, r = zcircle.radius;
-  return (
+  return fill ? (
     <Circle
       key = {["circle",cx,cy,r].join("_")}
       center = {[cx, cy]} radius = {r}
       fillColor = {fillColor(zcircle, color)}
     />
-  );
+  ) : (
+      <Circle
+        key={["circle", cx, cy, r].join("_")}
+        center={[cx, cy]} radius={r}
+        strokeColor={color}
+      />
+    );
 }
 
-function makeCircles(n, phi, shift, depth){
+function makeCircles(n, phi, shift, depth, nest){
   if(phi === 0) return null;
   var c0 = {center: complex(250, 250), radius : 240};
   var scircles = startingCircles(c0, n, phi, n*shift);
@@ -60,8 +67,9 @@ function makeCircles(n, phi, shift, depth){
   var Circles = new Array(depth);
   var colors = palette(depth, cividis);
   for (let i = 0; i < depth; ++i) {
-    Circles[i] = allCircles[i].map(function(x){
-      return makeCircle(x, colors[i])
+    Circles[i] = allCircles[i].map(function(x, index){
+      return makeCircle(x, colors[i], 
+        !nest || i>0 || (i===0 && index===n));
     });
   }
   return [].concat.apply([], Circles);
@@ -74,7 +82,8 @@ class App extends React.Component {
       n: 3,
       phi: 0.25, 
       shift: 0,
-      depth: 2
+      depth: 2,
+      nest: false
     };
   }
 
@@ -114,6 +123,12 @@ class App extends React.Component {
     }
   );
 
+  changeHandler_nest = (evt) => this.setState(
+    {
+      nest: evt.target.checked
+    }
+  );
+
   render() {
     return (
       <React.Fragment>
@@ -140,6 +155,10 @@ class App extends React.Component {
                 defaultValue={this.state.depth} min={1} max={5} step={1}
                 onChangeCommitted={this.changeHandler_depth}
               />
+              <Checkbox
+                id = "nest"
+                onChange = {this.changeHandler_nest}
+              />
             </div>
             <div className="inline">
               <PaperContainer>
@@ -147,7 +166,13 @@ class App extends React.Component {
                   center={[250, 250]} radius={240}
                   strokeColor='black'
                 />
-                {makeCircles(this.state.n, this.state.phi, this.state.shift, this.state.depth)}
+                {makeCircles(
+                  this.state.n, 
+                  this.state.phi, 
+                  this.state.shift, 
+                  this.state.depth,
+                  this.state.nest
+                )}
               </PaperContainer>
             </div>
           </Grid>
