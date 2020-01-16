@@ -18,3 +18,11 @@ canvas {
 .vtop {
   vertical-align: top;
 }
+
+.MuiSlider-root {
+  padding: 0;
+}
+
+.MuiTypography-gutterBottom {
+  margin-bottom: -6px !important;
+}

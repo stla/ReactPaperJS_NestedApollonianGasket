@@ -48,7 +48,6 @@ function CustomizedSlider(props) {
   const classes = useStyles();
   return (
     <div className={classes.root}>
-      <div className={classes.margin}/>
       <Typography gutterBottom>{props.title}</Typography>
       <PrettoSlider
         valueLabelDisplay="auto" {...props}

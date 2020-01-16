@@ -79,7 +79,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      n: 3,
+      n: 4,
       phi: 0.25, 
       shift: 0,
       depth: 2,
@@ -155,6 +155,7 @@ class App extends React.Component {
                 defaultValue={this.state.depth} min={1} max={5} step={1}
                 onChangeCommitted={this.changeHandler_depth}
               />
+              <label htmlFor="nest">Nest</label>
               <Checkbox
                 id = "nest"
                 onChange = {this.changeHandler_nest}
