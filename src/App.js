@@ -75,15 +75,54 @@ function makeCircles(n, phi, shift, depth, nest){
   return [].concat.apply([], Circles);
 }
 
+function update_ni(n, ni) {
+  if (ni.length < n) {
+    for (let i = 0; i < n - ni.length; ++i) {
+      ni.push(3);
+    }
+  }
+  return ni;
+}
+
+function replaceElt(array, index, value) {
+  var arrayClone = array.slice();
+  arrayClone[index] = value;
+  return arrayClone;
+}
+
+function niInputs(n, ni, nest, app) {
+  if(!nest) return null;
+  var sliders = new Array(n);
+  for (let i = 0; i < n; ++i) {
+    var id = "n_" + i;
+    var labelkey = "labn_" + i;
+    var divkey = "divn_" + i;
+    sliders[i] = (
+      <div key={divkey}>
+        <label htmlFor={id} key={labelkey}>n<sub>{i + 1}</sub></label>
+        <CustomizedSlider
+          title=""
+          key={id}
+          defaultValue={app.state.ni[i]} min={3} max={7}
+          onChangeCommitted={(e, value) => app.setState({ ni: replaceElt(ni, i, value) })}
+        />
+      </div>
+    );
+  }
+  return sliders;
+}
+
+
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      n: 4,
+      n: 3,
       phi: 0.25, 
       shift: 0,
       depth: 2,
-      nest: false
+      nest: false,
+      ni: [3,3,3]
     };
   }
 
@@ -92,7 +131,8 @@ class App extends React.Component {
       n: value,
       phi: this.state.phi,
       shift: this.state.shift,
-      depth: this.state.depth
+      depth: this.state.depth,
+      ni: update_ni(value, this.state.ni)
     }
   );
 
@@ -155,11 +195,19 @@ class App extends React.Component {
                 defaultValue={this.state.depth} min={1} max={5} step={1}
                 onChangeCommitted={this.changeHandler_depth}
               />
-              <label htmlFor="nest">Nest</label>
-              <Checkbox
-                id = "nest"
-                onChange = {this.changeHandler_nest}
-              />
+              <div>
+                <div className="inline vtop">
+                  <label htmlFor="nest">Nest</label>
+                  <Checkbox
+                    id = "nest"
+                    onChange = {this.changeHandler_nest}
+                  />
+                </div>
+                <div className="inline" style={{width: "10px"}}></div>
+                <div className="inline">
+                  {niInputs(this.state.n, this.state.ni, this.state.nest, this)}
+                </div>
+              </div>
             </div>
             <div className="inline">
               <PaperContainer>
