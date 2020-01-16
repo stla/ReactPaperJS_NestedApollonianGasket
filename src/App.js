@@ -50,9 +50,8 @@ function makeCircle(zcircle, color, fill) {
     );
 }
 
-function makeCircles(n, phi, shift, depth, nest){
+function makeCircles(c0, n, phi, shift, depth, nest, ni, hexs){
   if(phi === 0) return null;
-  var c0 = {center: complex(250, 250), radius : 240};
   var scircles = startingCircles(c0, n, phi, n*shift);
   var circles0 = scircles[0];
   var invCircles = scircles[1];
@@ -65,12 +64,20 @@ function makeCircles(n, phi, shift, depth, nest){
     previous = previous.concat(allCircles[i - 1]);
   }
   var Circles = new Array(depth);
-  var colors = palette(depth, cividis);
+  var colors = palette(depth, hexs);
   for (let i = 0; i < depth; ++i) {
     Circles[i] = allCircles[i].map(function(x, index){
       return makeCircle(x, colors[i], 
         !nest || i>0 || (i===0 && index===n));
     });
+  }
+  if(nest){
+    var Circles2 = [[].concat.apply([], Circles)];
+    for (let i = 0; i < n; ++i) {
+      var newCircles = makeCircles(circles0[i], ni[i], phi, shift, 2, false, null, viridis);
+      Circles2.push(newCircles);
+    }
+    return [].concat.apply([], Circles2);
   }
   return [].concat.apply([], Circles);
 }
@@ -101,6 +108,7 @@ function niInputs(n, ni, nest, app) {
       <div key={divkey}>
         <label htmlFor={id} key={labelkey}>n<sub>{i + 1}</sub></label>
         <CustomizedSlider
+          style={{ width: "70%" }}
           title=""
           key={id}
           defaultValue={app.state.ni[i]} min={3} max={7}
@@ -216,11 +224,14 @@ class App extends React.Component {
                   strokeColor='black'
                 />
                 {makeCircles(
+                  { center: complex(250, 250), radius: 240 }, 
                   this.state.n, 
                   this.state.phi, 
                   this.state.shift, 
                   this.state.depth,
-                  this.state.nest
+                  this.state.nest,
+                  this.state.ni,
+                  cividis
                 )}
               </PaperContainer>
             </div>
