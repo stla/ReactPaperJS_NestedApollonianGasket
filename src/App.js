@@ -50,7 +50,8 @@ function makeCircle(zcircle, color, fill) {
     );
 }
 
-function makeCircles(c0, n, phi, shift, depth, nest, ni, hexs){
+function makeCircles(c0, n, phi, shift, depth, nest, ni, hexs, 
+                      phi2, shift2, depth2){
   if(phi === 0) return null;
   var scircles = startingCircles(c0, n, phi, n*shift);
   var circles0 = scircles[0];
@@ -74,7 +75,8 @@ function makeCircles(c0, n, phi, shift, depth, nest, ni, hexs){
   if(nest){
     var Circles2 = [[].concat.apply([], Circles)];
     for (let i = 0; i < n; ++i) {
-      var newCircles = makeCircles(circles0[i], ni[i], phi, shift, 2, false, null, viridis);
+      var newCircles = 
+        makeCircles(circles0[i], ni[i], phi2, shift2, depth2, false, null, viridis, null, null, null);
       Circles2.push(newCircles);
     }
     return [].concat.apply([], Circles2);
@@ -108,7 +110,7 @@ function niInputs(n, ni, nest, app) {
       <div key={divkey}>
         <label htmlFor={id} key={labelkey}>n<sub>{i + 1}</sub></label>
         <CustomizedSlider
-          style={{ width: "70%" }}
+          style={{ width: "75%" }}
           title=""
           key={id}
           defaultValue={app.state.ni[i]} min={3} max={7}
@@ -120,6 +122,31 @@ function niInputs(n, ni, nest, app) {
   return sliders;
 }
 
+function nestInputs(nest, app){
+  if(!nest) return null;
+  return (
+    <React.Fragment>
+      <CustomizedSlider
+        style={{ width: "75%" }}
+        title="phi"
+        defaultValue={app.state.phi2} min={-0.95} max={0.95} step={0.05}
+        onChangeCommitted={(e, value) => app.setState({ phi2: value })}
+      />
+      <CustomizedSlider
+        style={{ width: "75%" }}
+        title="shift"
+        defaultValue={app.state.shift2} min={0} max={1} step={0.01}
+        onChangeCommitted={(e, value) => app.setState({ shift2: value })}
+      />
+      <CustomizedSlider
+        style={{ width: "75%" }}
+        title="depth"
+        defaultValue={app.state.depth2} min={1} max={5} step={1}
+        onChangeCommitted={(e, value) => app.setState({ depth2: value })}
+      />
+    </React.Fragment>
+  );
+} 
 
 class App extends React.Component {
   constructor(props) {
@@ -130,7 +157,10 @@ class App extends React.Component {
       shift: 0,
       depth: 2,
       nest: false,
-      ni: [3,3,3]
+      ni: [3,3,3],
+      phi2: 0.25,
+      shift2: 0,
+      depth2: 2
     };
   }
 
@@ -214,6 +244,7 @@ class App extends React.Component {
                 <div className="inline" style={{width: "10px"}}></div>
                 <div className="inline">
                   {niInputs(this.state.n, this.state.ni, this.state.nest, this)}
+                  {nestInputs(this.state.nest, this)}
                 </div>
               </div>
             </div>
@@ -231,7 +262,10 @@ class App extends React.Component {
                   this.state.depth,
                   this.state.nest,
                   this.state.ni,
-                  cividis
+                  cividis,
+                  this.state.phi2,
+                  this.state.shift2,
+                  this.state.depth2
                 )}
               </PaperContainer>
             </div>
